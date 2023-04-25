@@ -53,35 +53,55 @@ const generateReport = function(result, actual, expected, message) {
   console.log(formatMessage(result, expected, actual, message));
 }
 
-const typeOf = function(data) {
-  if(typeof data === 'object') {
-    return Array.isArray(data) ? 'array' : typeof data;
+const areArraysEqual = function(a, b) {
+  if(a === b) return true;
+
+  if(a.length !== b.length) return false;
+
+  for(const index in a) {
+    if(!isEqual(a[index], b[index])) {
+      return false;
+    }
   }
+
+  return true;
 }
 
-const areEqual = function(arg1, arg2) {
-  if(typeOf(arg1) !== typeOf(arg2)) {
-    return false;
+const areObjectsEqual = function(a, b) {
+  if(a === b) return true;
+
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+
+  if(keysA.length !== keysB.length) return false;
+
+  for(const key in a) {
+    if(!isEqual(a[key], b[key])) {
+      return false;
+    }
   }
 
-  if(typeof arg1  !== 'object') {
-    return arg1 === arg2;
+  return true;
+}
+
+const isObject = function(a) {
+  return !Array.isArray(a) && typeof a === "object";
+}
+
+const isEqual = function(a,b) {
+  if ([a,b].every(Array.isArray)) {
+    return areArraysEqual(a,b);
   }
 
-  if(Object.keys(arg1).length !== Object.keys(arg2).length) {
-    return false;
+  if ([a,b].every(isObject)) {
+    return areObjectsEqual(a,b);
   }
 
-  let result = true;
-  for(const key in arg1) {
-    result = result && areEqual(arg1[key], arg2[key]); 
-  }
-
-  return result;
+  return a === b;
 }
 
 const assertEquals = function(actual, expected, message) {
-  const result = areEqual(expected, actual);
+  const result = isEqual(expected, actual);
   generateReport(result, actual, expected, message);
 }
 
